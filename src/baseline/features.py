@@ -176,6 +176,11 @@ def add_bert_features(df: pd.DataFrame, _train_df: pd.DataFrame, descriptions_df
         print("Computing BERT embeddings (this may take a while)...")
         print(f"Using device: {config.BERT_DEVICE}")
 
+        # Limit GPU memory usage to prevent OOM errors
+        if config.BERT_DEVICE == "cuda" and torch is not None:
+            torch.cuda.set_per_process_memory_fraction(config.BERT_GPU_MEMORY_FRACTION)
+            print(f"GPU memory limited to {config.BERT_GPU_MEMORY_FRACTION * 100:.0f}% of available memory")
+
         # Load tokenizer and model
         tokenizer = AutoTokenizer.from_pretrained(config.BERT_MODEL_NAME)
         model = AutoModel.from_pretrained(config.BERT_MODEL_NAME)
